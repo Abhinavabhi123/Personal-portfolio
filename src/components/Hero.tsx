@@ -147,6 +147,9 @@ export default function Hero() {
                 src="/images/abhinav-profile-463x620.webp"
                 alt={profile.name}
                 className="h-auto w-full object-cover"
+                width={463}
+                height={620}
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#070b16]/70 via-transparent to-transparent" />
             </div>
