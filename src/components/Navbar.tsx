@@ -15,20 +15,40 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#home");
 
+
   useEffect(() => {
-    const onScroll = () => {
+    const handleScroll = () => {
       setScrolled(window.scrollY > 24);
-      const sections = links.map((l) => l.href.slice(1));
-      let current = "#home";
-      for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 120) current = `#${id}`;
-      }
-      setActive(current);
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(`#${entry.target.id}`);
+          }
+        });
+      },
+      {
+        threshold: 0.3,
+        rootMargin: "-120px 0px -50% 0px",
+      },
+    );
+
+    links.forEach((link) => {
+      const el = document.getElementById(link.href.replace("#", ""));
+
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   return (
@@ -40,7 +60,10 @@ export default function Navbar() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <a href="#home" className="group flex items-center gap-2 font-mono text-lg font-bold text-white">
+        <a
+          href="#home"
+          className="group flex items-center gap-2 font-mono text-lg font-bold text-white"
+        >
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-teal-400 to-cyan-600 text-sm text-[#070b16] shadow-lg shadow-teal-500/25 transition-transform group-hover:rotate-6">
             {"</>"}
           </span>
@@ -78,8 +101,19 @@ export default function Navbar() {
           onClick={() => setOpen(!open)}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-white lg:hidden"
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-            {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          >
+            {open ? (
+              <path d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            )}
           </svg>
         </button>
       </nav>
@@ -93,7 +127,9 @@ export default function Navbar() {
                   href={l.href}
                   onClick={() => setOpen(false)}
                   className={`block rounded-lg px-4 py-2.5 text-sm font-medium ${
-                    active === l.href ? "bg-teal-400/10 text-teal-300" : "text-slate-300 hover:bg-white/5"
+                    active === l.href
+                      ? "bg-teal-400/10 text-teal-300"
+                      : "text-slate-300 hover:bg-white/5"
                   }`}
                 >
                   {l.label}
