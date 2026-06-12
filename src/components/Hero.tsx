@@ -144,7 +144,7 @@ export default function Hero() {
             <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-teal-400/40 via-cyan-500/20 to-transparent blur-2xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-slate-800/60 to-slate-900/80 shadow-2xl shadow-black/50">
               <img
-                src="/images/abhinav-profile.webp"
+                src="/images/abhinav-profile-463x620.webp"
                 alt={profile.name}
                 className="h-auto w-full object-cover"
               />
