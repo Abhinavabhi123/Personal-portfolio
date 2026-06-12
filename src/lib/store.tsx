@@ -233,6 +233,7 @@ type ContentContextValue = {
   saveContent: (next: ContentData) => Promise<void>;
   resetContent: () => Promise<void>;
   backendOnline: boolean | null;
+  loading: boolean;
 };
 
 const ContentContext = createContext<ContentContextValue>({
@@ -240,6 +241,7 @@ const ContentContext = createContext<ContentContextValue>({
   saveContent: async () => {},
   resetContent: async () => {},
   backendOnline: null,
+  loading: true,
 });
 
 export function ContentProvider({ children }: { children: React.ReactNode }) {
@@ -253,28 +255,44 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     return defaultContent;
   });
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
-      const online = await checkApi();
-      if (cancelled) return;
-      setBackendOnline(online);
-      if (online) {
-        try {
+      setLoading(true);
+
+      try {
+        const online = await checkApi();
+
+        if (cancelled) return;
+
+        setBackendOnline(online);
+        if (online) {
           const res = await apiFetch("/api/content");
+
           if (res.ok) {
             const data = await res.json();
             if (!cancelled && data.content) {
-              setContent({ ...defaultContent, ...data.content });
+              setContent({
+                ...defaultContent,
+                ...data.content,
+              });
+
               localStorage.setItem(LS_CONTENT, JSON.stringify(data.content));
             }
           }
-        } catch {
-          /* ignore */
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
         }
       }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -309,8 +327,8 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ content, saveContent, resetContent, backendOnline }),
-    [content, saveContent, resetContent, backendOnline],
+    () => ({ content, saveContent, resetContent, backendOnline, loading }),
+    [content, saveContent, resetContent, backendOnline, loading],
   );
 
   return (
